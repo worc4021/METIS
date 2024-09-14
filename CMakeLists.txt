@@ -1,52 +1,53 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.5)
 project(METIS C)
 
-set(SHARED FALSE CACHE BOOL "build a shared library")
+include(GNUInstallDirs)
 
-if(MSVC)
-  set(METIS_INSTALL FALSE)
-else()
-  set(METIS_INSTALL TRUE)
-endif()
-
-# Configure libmetis library.
-if(SHARED)
-  set(METIS_LIBRARY_TYPE SHARED)
-else()
-  set(METIS_LIBRARY_TYPE STATIC)
-endif(SHARED)
+include($ENV{CMAKE_INSTALL_PREFIX}/cmake/GKlibTargets.cmake)
 
 include(./conf/gkbuild.cmake)
 
 # METIS' custom options
-#option(IDX64 "enable 64 bit ints" OFF)
-#option(REAL64 "enable 64 bit floats (i.e., double)" OFF)
-#if(IDX64)
-#  set(METIS_COPTIONS "${METIS_COPTIONS} -DIDXTYPEWIDTH=64")
-#else()
-#  set(METIS_COPTIONS "${METIS_COPTIONS} -DIDXTYPEWIDTH=32")
-#endif(IDX64)
-#if(REAL64)
-#  set(METIS_COPTIONS "${METIS_COPTIONS} -DREALTYPEWIDTH=64")
-#else()
-#  set(METIS_COPTIONS "${METIS_COPTIONS} -DREALTYPEWIDTH=32")
-#endif(REAL64)
-#
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${METIS_COPTIONS}")
+option(IDX64 "enable 64 bit ints" OFF)
+option(REAL64 "enable 64 bit floats (i.e., double)" OFF)
+if(IDX64)
+ set(METIS_COPTIONS "${METIS_COPTIONS} -DIDXTYPEWIDTH=64")
+else()
+ set(METIS_COPTIONS "${METIS_COPTIONS} -DIDXTYPEWIDTH=32")
+endif(IDX64)
+if(REAL64)
+ set(METIS_COPTIONS "${METIS_COPTIONS} -DREALTYPEWIDTH=64")
+else()
+ set(METIS_COPTIONS "${METIS_COPTIONS} -DREALTYPEWIDTH=32")
+endif(REAL64)
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${METIS_COPTIONS}")
 
-# Add include directories.
-# i.e., the -I equivalent
-include_directories(build/xinclude)
-include_directories(${GKLIB_PATH}/include)
-include_directories(${CMAKE_INSTALL_PREFIX}/include)
-
-# List of paths that the compiler will search for library files.
-# i.e., the -L equivalent
-link_directories(${GKLIB_PATH}/lib)
-link_directories(${CMAKE_INSTALL_PREFIX}/lib)
 
 # Recursively look for CMakeLists.txt in subdirs.
-add_subdirectory("build/xinclude")
-add_subdirectory("libmetis")
-add_subdirectory("programs")
+# add_subdirectory("libmetis")
+
+# Find sources.
+file(GLOB metis_sources libmetis/*.c)
+
+# Build libmetis.
+add_library(metis ${metis_sources})
+
+target_include_directories(metis PUBLIC 
+                                $<BUILD_INTERFACE:libmetis include>
+                                $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/metis>)
+target_link_libraries(metis GKlib::GKlib)
+
+add_subdirectory(programs)
+
+install(TARGETS metis
+      EXPORT metisTargets
+      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(FILES include/metis.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/metis)
+install(EXPORT metisTargets
+      FILE metisTargets.cmake
+      NAMESPACE metis::
+      DESTINATION cmake)
+

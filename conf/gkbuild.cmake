@@ -50,7 +50,11 @@ elseif(${CMAKE_C_COMPILER_ID} MATCHES "Sun")
 endif(CMAKE_COMPILER_IS_GNUCC)
 
 if(${CMAKE_C_COMPILER_ID} STREQUAL "Intel")
-  set(GK_COPTIONS "${GK_COPTIONS} -xHost")
+  if (WIN32)
+    set(GK_COPTIONS "${GK_COPTIONS} /QxHost")
+  else()
+    set(GK_COPTIONS "${GK_COPTIONS} -xHost")
+  endif()
   #  set(GK_COPTIONS "${GK_COPTIONS} -fast")
 endif()
 

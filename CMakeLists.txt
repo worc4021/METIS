@@ -8,11 +8,8 @@ include($ENV{CMAKE_INSTALL_PREFIX}/cmake/GKlibTargets.cmake)
 include(./conf/gkbuild.cmake)
 
 # METIS' custom options
-option(IDX64 "enable 64 bit ints" OFF)
-option(REAL64 "enable 64 bit floats (i.e., double)" OFF)
-
-# Recursively look for CMakeLists.txt in subdirs.
-# add_subdirectory("libmetis")
+option(IDX64 "enable 64 bit ints" ON) # required for Mumps
+option(REAL64 "enable 64 bit floats (i.e., double)" TRUE)
 
 # Find sources.
 file(GLOB metis_sources libmetis/*.c)
@@ -24,9 +21,22 @@ target_include_directories(metis PUBLIC
                                 $<BUILD_INTERFACE:libmetis include>
                                 $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/metis>)
 target_link_libraries(metis GKlib::GKlib)
-set(INDEXTYPEWIDTH "$<IF:$<BOOL:${IDX64}>,64,32>")
-set(REALTYPEWIDTH "$<IF:$<BOOL:${REAL64}>,64,32>")
+if (IDX64)
+      set(INDEXTYPEWIDTH 64)
+else(IDX64)
+      set(INDEXTYPEWIDTH 32)
+endif(IDX64)
+
+if (REAL64)
+      set(REALTYPEWIDTH 64)
+else(REAL64)
+      set(REALTYPEWIDTH 32)
+endif(REAL64)
+
 target_compile_definitions(metis PUBLIC IDXTYPEWIDTH=${INDEXTYPEWIDTH} REALTYPEWIDTH=${REALTYPEWIDTH})
+message(STATUS "Configured with IDXTYPEWIDTH=${INDEXTYPEWIDTH} REALTYPEWIDTH=${REALTYPEWIDTH}")
+
+enable_testing()
 
 add_subdirectory(programs)
 

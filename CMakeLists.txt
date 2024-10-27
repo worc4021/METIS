@@ -3,6 +3,8 @@ project(METIS C)
 
 include(GNUInstallDirs)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
+
 include($ENV{CMAKE_INSTALL_PREFIX}/cmake/GKlibTargets.cmake)
 
 include(./conf/gkbuild.cmake)

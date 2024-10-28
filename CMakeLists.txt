@@ -3,8 +3,6 @@ project(METIS C)
 
 include(GNUInstallDirs)
 
-set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
-
 include($ENV{CMAKE_INSTALL_PREFIX}/cmake/GKlibTargets.cmake)
 
 include(./conf/gkbuild.cmake)
@@ -23,6 +21,10 @@ target_include_directories(metis PUBLIC
                                 $<BUILD_INTERFACE:libmetis include>
                                 $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/metis>)
 target_link_libraries(metis GKlib::GKlib)
+set_target_properties(metis PROPERTIES 
+      POSITION_INDEPENDENT_CODE ON
+      MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
 if (IDX64)
       set(INDEXTYPEWIDTH 64)
 else(IDX64)
@@ -44,9 +46,9 @@ add_subdirectory(programs)
 
 install(TARGETS metis
       EXPORT metisTargets
-      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/${CMAKE_BUILD_TYPE}
+      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/${CMAKE_BUILD_TYPE}
+      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/${CMAKE_BUILD_TYPE})
 install(FILES include/metis.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/metis)
 install(EXPORT metisTargets
       FILE metisTargets.cmake

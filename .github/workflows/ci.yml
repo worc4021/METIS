@@ -22,20 +22,15 @@ jobs:
         cmake-version: '3.29.x'
     - name: Prepare pulling cmake installed libraries
       run: |
-        mkdir -p ${{ runner.TEMP }}/cmake
-        echo "CMAKE_INSTALL_PREFIX=${{ runner.TEMP }}/cmake" >> $GITHUB_ENV
-      working-directory: ${{ github.workspace }}
+        echo "CMAKE_INSTALL_PREFIX=${{ runner.TEMP }}" >> $GITHUB_ENV
     - name: Download artifact
       id: download-artifact
       uses: dawidd6/action-download-artifact@v6
       with: 
         name: gklib-linux-gcc
         repo: worc4021/GKlib
-        path: ${{ runner.TEMP }}/cmake
+        path: ${{ runner.TEMP }}
         workflow: ci.yml
-    - name: Check downloaded artifact
-      run: |
-        ls -lah ${{ runner.TEMP }}/cmake
     - name: Configure
       run: |
         cmake --preset linux-gcc-release-config
@@ -47,36 +42,47 @@ jobs:
     - name: Upload library
       uses: actions/upload-artifact@v4
       with:
-        name: gklib-linux-gcc
+        name: metis-linux-gcc
         path: ${{ github.workspace }}/out/install/linux-gcc-release-config
  
 
-#   windows-build:
-#     runs-on: windows-latest
-#     defaults:
-#       run:
-#         shell: bash
-#     steps:
-#     - uses: actions/checkout@v3
-#     - name: Setup Ninja
-#       uses: seanmiddleditch/gha-setup-ninja@master
-#     - name: Setup cmake
-#       uses: jwlawson/actions-setup-cmake@v2
-#       with:
-#         cmake-version: '3.29.x'
-#     - uses: worc4021/oneApi@v1
-#     - name: Configure
-#       run: |
-#         cmake --preset windows-intel-release-config
-#       working-directory: ${{ github.workspace }}
-#       shell: cmd
-#     - name: Build
-#       run: |
-#         cmake --build --preset windows-intel-release-build --target install
-#       working-directory: ${{ github.workspace }}
-#       shell: cmd
-#     - name: Upload library
-#       uses: actions/upload-artifact@v4
-#       with:
-#         name: gklib-windows-intel
-#         path: ${{ github.workspace }}/out/install/windows-intel-release-config
+  windows-build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup Ninja
+      uses: seanmiddleditch/gha-setup-ninja@master
+    - name: Setup cmake
+      uses: jwlawson/actions-setup-cmake@v2
+      with:
+        cmake-version: '3.29.x'
+    - name: Prepare pulling cmake installed libraries
+      run: |
+        echo "CMAKE_INSTALL_PREFIX=${{ runner.TEMP }}" >> $GITHUB_ENV
+    - name: Download artifact
+      id: download-artifact
+      uses: dawidd6/action-download-artifact@v6
+      with: 
+        name: gklib-windows-intel
+        repo: worc4021/GKlib
+        path: ${{ runner.TEMP }}
+        workflow: ci.yml
+    - uses: worc4021/oneApi@v1
+    - name: Configure
+      run: |
+        cmake --preset windows-intel-release-config
+      working-directory: ${{ github.workspace }}
+      shell: cmd
+    - name: Build
+      run: |
+        cmake --build --preset windows-intel-release-build --target install
+      working-directory: ${{ github.workspace }}
+      shell: cmd
+    - name: Upload library
+      uses: actions/upload-artifact@v4
+      with:
+        name: metis-windows-intel
+        path: ${{ github.workspace }}/out/install/windows-intel-release-config

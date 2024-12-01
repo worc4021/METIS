@@ -32,6 +32,7 @@ jobs:
         name: gklib-linux-gcc
         repo: worc4021/GKlib
         path: $HOME/cmake
+        workflow: ci.yml
     - name: Configure
       run: |
         cmake --preset linux-gcc-release-config

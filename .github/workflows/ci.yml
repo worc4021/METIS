@@ -22,8 +22,8 @@ jobs:
         cmake-version: '3.29.x'
     - name: Prepare pulling cmake installed libraries
       run: |
-        mkdir -p $HOME/cmake
-        echo "CMAKE_INSTALL_PREFIX=$HOME/cmake" >> $GITHUB_ENV
+        mkdir -p ${{ runner.TEMP }}/cmake
+        echo "CMAKE_INSTALL_PREFIX=${{ runner.TEMP }}/cmake" >> $GITHUB_ENV
       working-directory: ${{ github.workspace }}
     - name: Download artifact
       id: download-artifact
@@ -31,11 +31,11 @@ jobs:
       with: 
         name: gklib-linux-gcc
         repo: worc4021/GKlib
-        path: $HOME/cmake
+        path: ${{ runner.TEMP }}/cmake
         workflow: ci.yml
     - name: Check downloaded artifact
       run: |
-        ls -lah $HOME/cmake
+        ls -lah ${{ runner.TEMP }}/cmake
     - name: Configure
       run: |
         cmake --preset linux-gcc-release-config

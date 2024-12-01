@@ -33,9 +33,11 @@ jobs:
         repo: worc4021/GKlib
         path: $HOME/cmake
         workflow: ci.yml
+    - name: Check downloaded artifact
+      run: |
+        ls -lah $HOME/cmake
     - name: Configure
       run: |
-        ls -lAh $HOME/cmake
         cmake --preset linux-gcc-release-config
       working-directory: ${{ github.workspace }}
     - name: Build

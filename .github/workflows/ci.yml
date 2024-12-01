@@ -25,10 +25,12 @@ jobs:
         mkdir -p $HOME/cmake
         echo "CMAKE_INSTALL_PREFIX=$HOME/cmake" >> $GITHUB_ENV
       working-directory: ${{ github.workspace }}
-    - uses: actions/download-artifact@v4
+    - name: Download artifact
+      id: download-artifact
+      uses: dawidd6/action-download-artifact@v6
       with: 
         name: gklib-linux-gcc
-        repository: worc4021/GKlib
+        repo: worc4021/GKlib
         path: $HOME/cmake
     - name: Configure
       run: |

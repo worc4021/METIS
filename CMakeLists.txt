@@ -17,9 +17,13 @@ file(GLOB metis_sources libmetis/*.c)
 # Build libmetis.
 add_library(metis ${metis_sources})
 
-target_include_directories(metis PUBLIC 
-                                $<BUILD_INTERFACE:libmetis include>
-                                $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/metis>)
+target_include_directories(metis PRIVATE libmetis)
+
+target_sources(metis PUBLIC
+                  FILE_SET HEADERS
+                  BASE_DIRS include
+                  FILES include/metis.h)
+
 target_link_libraries(metis GKlib::GKlib)
 set_target_properties(metis PROPERTIES 
       POSITION_INDEPENDENT_CODE ON
@@ -48,8 +52,8 @@ install(TARGETS metis
       EXPORT metisTargets
       LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/${CMAKE_BUILD_TYPE}
       ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/${CMAKE_BUILD_TYPE}
-      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/${CMAKE_BUILD_TYPE})
-install(FILES include/metis.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/metis)
+      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/${CMAKE_BUILD_TYPE}
+      FILE_SET HEADERS)
 install(EXPORT metisTargets
       FILE metisTargets.cmake
       NAMESPACE metis::

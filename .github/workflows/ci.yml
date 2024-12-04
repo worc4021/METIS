@@ -14,6 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - uses: worc4021/oneApi@v7
+      with:
+        icx: true
     - name: Setup Ninja
       uses: seanmiddleditch/gha-setup-ninja@master
     - name: Setup cmake
@@ -33,17 +36,17 @@ jobs:
         workflow: ci.yml
     - name: Configure
       run: |
-        cmake --preset linux-gcc-release-config
+        cmake --preset linux-intel-release-config
       working-directory: ${{ github.workspace }}
     - name: Build
       run: |
-        cmake --build --preset linux-gcc-release-build --target install
+        cmake --build --preset linux-intel-release-build --target install
       working-directory: ${{ github.workspace }}
     - name: Upload library
       uses: actions/upload-artifact@v4
       with:
-        name: metis-linux-gcc
-        path: ${{ github.workspace }}/out/install/linux-gcc-release-config
+        name: metis-linux-intel
+        path: ${{ github.workspace }}/out/install/linux-intel-release-config
  
 
   windows-build:
@@ -53,6 +56,9 @@ jobs:
         shell: bash
     steps:
     - uses: actions/checkout@v3
+    - uses: worc4021/oneApi@v7
+      with:
+        icx: true
     - name: Setup Ninja
       uses: seanmiddleditch/gha-setup-ninja@master
     - name: Setup cmake
@@ -70,7 +76,7 @@ jobs:
         repo: worc4021/GKlib
         path: ${{ runner.TEMP }}
         workflow: ci.yml
-    - uses: worc4021/oneApi@v1
+    
     - name: Configure
       run: |
         cmake --preset windows-intel-release-config

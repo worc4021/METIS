@@ -11,10 +11,16 @@ on:
 
 jobs:
   linux-build:
+    strategy:
+      matrix:
+        compiler: 
+        - gcc
+        - intel
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
     - uses: worc4021/oneApi@v7
+      if: ${{ matrix.compiler == 'intel' }}
       with:
         icx: true
     - name: Setup Ninja
@@ -30,23 +36,23 @@ jobs:
       id: download-artifact
       uses: dawidd6/action-download-artifact@v6
       with: 
-        name: gklib-linux-intel
+        name: gklib-linux-${{ matrix.compiler }}
         repo: worc4021/GKlib
         path: ${{ runner.TEMP }}
         workflow: ci.yml
     - name: Configure
       run: |
-        cmake --preset linux-intel-release-config
+        cmake --preset linux-${{ matrix.compiler }}-release-config
       working-directory: ${{ github.workspace }}
     - name: Build
       run: |
-        cmake --build --preset linux-intel-release-build --target install
+        cmake --build --preset linux-${{ matrix.compiler }}-release-build --target install
       working-directory: ${{ github.workspace }}
     - name: Upload library
       uses: actions/upload-artifact@v4
       with:
-        name: metis-linux-intel
-        path: ${{ github.workspace }}/out/install/linux-intel-release-config
+        name: metis-linux-${{ matrix.compiler }}
+        path: ${{ github.workspace }}/out/install/linux-${{ matrix.compiler }}-release-config
  
 
   windows-build:

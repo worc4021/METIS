@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.25)
 project(METIS C)
 
 set(SHARED FALSE CACHE BOOL "build a shared library")
@@ -16,37 +16,32 @@ else()
   set(METIS_LIBRARY_TYPE STATIC)
 endif(SHARED)
 
-include(./conf/gkbuild.cmake)
+include(FetchContent)
+FetchContent_Declare(
+  gklib
+  GIT_REPOSITORY https://github.com/worc4021/GKlib.git
+  GIT_TAG        master
+  EXCLUDE_FROM_ALL
+)
+FetchContent_MakeAvailable(gklib)
+
 
 # METIS' custom options
-#option(IDX64 "enable 64 bit ints" OFF)
-#option(REAL64 "enable 64 bit floats (i.e., double)" OFF)
-#if(IDX64)
-#  set(METIS_COPTIONS "${METIS_COPTIONS} -DIDXTYPEWIDTH=64")
-#else()
-#  set(METIS_COPTIONS "${METIS_COPTIONS} -DIDXTYPEWIDTH=32")
-#endif(IDX64)
-#if(REAL64)
-#  set(METIS_COPTIONS "${METIS_COPTIONS} -DREALTYPEWIDTH=64")
-#else()
-#  set(METIS_COPTIONS "${METIS_COPTIONS} -DREALTYPEWIDTH=32")
-#endif(REAL64)
-#
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${METIS_COPTIONS}")
+option(IDX64 "enable 64 bit ints" OFF)
+option(REAL64 "enable 64 bit floats (i.e., double)" OFF)
+set(METIS_COPTIONS "")
+if(IDX64)
+ list(APPEND METIS_COPTIONS "IDXTYPEWIDTH=64")
+else()
+ list(APPEND METIS_COPTIONS "IDXTYPEWIDTH=32")
+endif(IDX64)
+if(REAL64)
+ list(APPEND METIS_COPTIONS "REALTYPEWIDTH=64")
+else()
+ list(APPEND METIS_COPTIONS "REALTYPEWIDTH=32")
+endif(REAL64)
 
+set(INSTALL_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-# Add include directories.
-# i.e., the -I equivalent
-include_directories(build/xinclude)
-include_directories(${GKLIB_PATH}/include)
-include_directories(${CMAKE_INSTALL_PREFIX}/include)
-
-# List of paths that the compiler will search for library files.
-# i.e., the -L equivalent
-link_directories(${GKLIB_PATH}/lib)
-link_directories(${CMAKE_INSTALL_PREFIX}/lib)
-
-# Recursively look for CMakeLists.txt in subdirs.
-add_subdirectory("build/xinclude")
 add_subdirectory("libmetis")
 add_subdirectory("programs")

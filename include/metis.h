@@ -105,14 +105,14 @@ typedef __int64 int64_t;
   #define SCIDX  SCNd64
   #define PRIDX  PRId64
 
-#ifdef COMPILER_MSC
+#ifdef _WIN32
   #define strtoidx      _strtoi64
 #else
   #define strtoidx      strtoll
 #endif
   #define iabs          labs
 #else
-  #error "Incorrect user-supplied value fo IDXTYPEWIDTH"
+  #error "Incorrect user-supplied value of IDXTYPEWIDTH"
 #endif
 
 

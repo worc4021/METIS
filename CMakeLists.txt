@@ -3,8 +3,6 @@ project(METIS C)
 
 include(GNUInstallDirs)
 
-include($ENV{CMAKE_INSTALL_PREFIX}/cmake/GKlibTargets.cmake)
-
 # Configure libmetis library.
 if(SHARED)
   set(METIS_LIBRARY_TYPE SHARED)
@@ -21,7 +19,8 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(gklib)
 
-
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 # METIS' custom options
 option(IDX64 "enable 64 bit ints" OFF)
 option(REAL64 "enable 64 bit floats (i.e., double)" OFF)
@@ -37,30 +36,28 @@ else()
  list(APPEND METIS_COPTIONS "REALTYPEWIDTH=32")
 endif(REAL64)
 
-set(INSTALL_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+# Find sources.
+file(GLOB metis_sources ${CMAKE_CURRENT_SOURCE_DIR}/libmetis/*.c)
+file(GLOB metis_headers ${CMAKE_CURRENT_SOURCE_DIR}/libmetis/*.h)
 
-add_subdirectory("libmetis")
-add_subdirectory("programs")
-
-target_link_libraries(metis GKlib::GKlib)
-set_target_properties(metis PROPERTIES 
-      POSITION_INDEPENDENT_CODE ON
-      MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-
-if (IDX64)
-      set(INDEXTYPEWIDTH 64)
-else(IDX64)
-      set(INDEXTYPEWIDTH 32)
-endif(IDX64)
-
-if (REAL64)
-      set(REALTYPEWIDTH 64)
-else(REAL64)
-      set(REALTYPEWIDTH 32)
-endif(REAL64)
-
-target_compile_definitions(metis PUBLIC IDXTYPEWIDTH=${INDEXTYPEWIDTH} REALTYPEWIDTH=${REALTYPEWIDTH})
-message(STATUS "Configured with IDXTYPEWIDTH=${INDEXTYPEWIDTH} REALTYPEWIDTH=${REALTYPEWIDTH}")
+# Build libmetis.
+add_library(metis ${METIS_LIBRARY_TYPE} ${metis_sources})
+target_link_libraries(metis PUBLIC GKlib)
+target_sources(metis
+      PRIVATE 
+        FILE_SET private_header_set
+        TYPE HEADERS 
+        BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/libmetis
+        FILES ${metis_headers}
+)
+target_sources(metis
+      PUBLIC 
+        FILE_SET public_header_set
+        TYPE HEADERS
+        BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include
+        FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/metis.h
+      )     
+target_compile_definitions(metis PUBLIC ${METIS_COPTIONS})
 
 enable_testing()
 
@@ -71,7 +68,7 @@ install(TARGETS metis
       LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/${CMAKE_BUILD_TYPE}
       ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/${CMAKE_BUILD_TYPE}
       RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/${CMAKE_BUILD_TYPE}
-      FILE_SET HEADERS)
+      FILE_SET public_header_set)
 install(EXPORT metisTargets
       FILE metisTargets.cmake
       NAMESPACE metis::

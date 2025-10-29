@@ -3,6 +3,7 @@ project(METIS C)
 
 include(GNUInstallDirs)
 
+
 # Configure libmetis library.
 if(SHARED)
   set(METIS_LIBRARY_TYPE SHARED)
@@ -22,6 +23,7 @@ FetchContent_MakeAvailable(gklib)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 # METIS' custom options
+option(METIS_BUILD_TESTS "Build the METIS tests" ON)
 option(IDX64 "enable 64 bit ints" OFF)
 option(REAL64 "enable 64 bit floats (i.e., double)" OFF)
 set(METIS_COPTIONS "")
@@ -39,7 +41,7 @@ endif(REAL64)
 # Find sources.
 file(GLOB metis_sources ${CMAKE_CURRENT_SOURCE_DIR}/libmetis/*.c)
 file(GLOB metis_headers ${CMAKE_CURRENT_SOURCE_DIR}/libmetis/*.h)
-
+set(METIS_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 # Build libmetis.
 add_library(metis ${METIS_LIBRARY_TYPE} ${metis_sources})
 target_link_libraries(metis PUBLIC GKlib)
@@ -59,9 +61,11 @@ target_sources(metis
       )     
 target_compile_definitions(metis PUBLIC ${METIS_COPTIONS})
 
-enable_testing()
-
-add_subdirectory(programs)
+if(METIS_BUILD_TESTS)
+  include(CTest)
+  enable_testing()
+  add_subdirectory(programs)
+endif()
 
 install(TARGETS metis
       EXPORT metisTargets

@@ -16,5 +16,5 @@ endforeach(prog)
 install(TARGETS gpmetis ndmetis mpmetis m2gmetis graphchk cmpfillin
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-add_test(NAME m2gmetis COMMAND m2gmetis ${PROJECT_SOURCE_DIR}/graphs/metis.mesh test.graph)
-add_test(NAME graphchk COMMAND graphchk ${PROJECT_SOURCE_DIR}/graphs/4elt.graph)
+add_test(NAME m2gmetis COMMAND m2gmetis ${METIS_BASE_DIR}/graphs/metis.mesh test.graph)
+add_test(NAME graphchk COMMAND graphchk ${METIS_BASE_DIR}/graphs/4elt.graph)

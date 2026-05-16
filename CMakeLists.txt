@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.25)
 project(METIS C)
 
 include(GNUInstallDirs)
-
+include(CMakePackageConfigHelpers)
 
 # Configure libmetis library.
 if(SHARED)
@@ -11,14 +11,8 @@ else()
   set(METIS_LIBRARY_TYPE STATIC)
 endif(SHARED)
 
-include(FetchContent)
-FetchContent_Declare(
-  gklib
-  GIT_REPOSITORY https://github.com/worc4021/GKlib.git
-  GIT_TAG        master
-  EXCLUDE_FROM_ALL
-)
-FetchContent_MakeAvailable(gklib)
+find_package(GKlib REQUIRED)
+
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
@@ -44,7 +38,7 @@ file(GLOB metis_headers ${CMAKE_CURRENT_SOURCE_DIR}/libmetis/*.h)
 set(METIS_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 # Build libmetis.
 add_library(metis ${METIS_LIBRARY_TYPE} ${metis_sources})
-target_link_libraries(metis PUBLIC GKlib)
+target_link_libraries(metis PUBLIC GKlib::GKlib)
 target_sources(metis
       PRIVATE 
         FILE_SET private_header_set
@@ -67,14 +61,19 @@ if(METIS_BUILD_TESTS)
   add_subdirectory(programs)
 endif()
 
-install(TARGETS metis
-      EXPORT metisTargets
-      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/${CMAKE_BUILD_TYPE}
-      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/${CMAKE_BUILD_TYPE}
-      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/${CMAKE_BUILD_TYPE}
-      FILE_SET public_header_set)
-install(EXPORT metisTargets
-      FILE metisTargets.cmake
-      NAMESPACE metis::
-      DESTINATION cmake)
+configure_package_config_file(METISConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/METISConfig.cmake
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/METIS)
 
+install(TARGETS metis
+      EXPORT METISTargets
+      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+      FILE_SET public_header_set)
+install(EXPORT METISTargets
+      FILE METISTargets.cmake
+      NAMESPACE METIS::
+      DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/METIS)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/METISConfig.cmake
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/METIS )
